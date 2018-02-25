@@ -1,9 +1,21 @@
+#Instalar 'psycopg2' desde http://www.stickpeople.com/projects/python/win-psycopg/
+#Crear la Base de Datos mediante script adjunto
+
 import os
+import psycopg2, psycopg2.extras
 
 #METODOS
 
-def getConectionPostgres(host, database, usuario, password):
-    return 0
+def getConectionPostgres(
+    host, 
+    database, 
+    usuario, 
+    password,
+    port
+): 
+    stringConexion = "dbname = '" + database + "' user = '" + usuario + "' password = '" + password + "' port = " + port + "' host = '" + host + "'"        
+    connexion = psycopg2.connect(stringConexion)
+    return connexion
 
 def leerBase():
     return 0
@@ -37,9 +49,20 @@ while (opcion != 5):
     #opciones
 
     if(opcion == 1):
-        print("LEERA LA BASE DE DATOS")
+        print("LEERÁ LA BASE DE DATOS")
         print("======================\n\n")
+        
+        conexion = getConectionPostgres(
+            'localhost', 
+            'crudPython', 
+            'postgres',
+            'postgres',
+            '1680')
 
+        cur = conexion.cursor()
+        cur.execute("SELECT * FROM persona")
+        rows=cur.fetchall()
+        print (rows)
         input("\nTecla para continuar.... \n") 
 
     elif (opcion == 2):
@@ -49,7 +72,7 @@ while (opcion != 5):
         input("\nTecla para continuar.... \n") 
 
     elif (opcion == 3):
-        print("EDITARA UN REGISTRO EN LA BASE DE DATOS")
+        print("EDITARÁ UN REGISTRO EN LA BASE DE DATOS")
         print("======================================\n\n")
 
         input("\nTecla para continuar.... \n") 

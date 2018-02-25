@@ -29,3 +29,16 @@ WITH (
 );
 ALTER TABLE public.persona
   OWNER TO postgres;
+
+INSERT INTO public.persona(
+per_id, 
+per_nombre, 
+per_apellidomaterno, 
+per_apellidopaterno,
+per_rut, 
+per_observacion
+)
+VALUES
+(1, 'DANIEL', 'PUELLES', 'TOLOZA', '17339126-9', 'MUY INGENUO'),
+(2, 'TOMAS', 'TOLOZA', 'GUTIERREZ', '18864782-9', 'MUY SEGURO'),
+(3, 'NICOLAS', 'GUTIERREZ', 'MIRANDA', '17951115-0', 'MUY MAMA');
