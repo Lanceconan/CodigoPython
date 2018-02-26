@@ -25,7 +25,10 @@ def leerBase(conexion, registros):
     cur.execute("SELECT * FROM persona LIMIT " + str(registros))
     
     for row in cur:
-        print("ID: %s \nNOMBRE: %s \nApellido Paterno: %s \nApellido Materno: %s \nRut: %s \nObservación", (str(row[0]), str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5])))
+        print("\nID: " + str(row[0]) + "\nNOMBRE: " + str(row[1]) + "\nApellido Paterno: " + str(row[2]) +  "\nApellido Materno: " + str(row[3]) + "\nRut: " + str(row[4]) +  "\nObservación: " + str(row[5]))
+    
+    cur.close()
+    conexion.close()
     
 
 def editarBase(conexion, idPersona):
@@ -41,14 +44,23 @@ def eliminarBase(conexion, idPersona):
     return 0
 
 def crearRegistroBase(conexion, persona):
+    persona.setIdPersona(getNextId(conexion))
+    
     cur = conexion.cursor()
-    queryCrear = "INSERT INTO persona (per_id, per_nombre, per_apellidomaterno, per_apellidopaterno, per_rut character, per_observacion) VALUES (" + "," + "," + "," + "," + ");"
-    cur.execute(queryCrear)
-    return 0
+    queryCrear = "INSERT INTO persona (per_id, per_nombre, per_apellidomaterno, per_apellidopaterno, per_rut, per_observacion) VALUES (" + persona.getIdPersona() + "::bigint, '" + persona.getNombre() +  "'::character varying,'" + persona.getApellidoPaterno() + "'::character varying,'" + persona.getApellidoMaterno() + "'::character varying,'" + persona.getRut() + "'::character varying,'" + persona.getObservacion() + "'::character varying);"
+    print (queryCrear)
+    cur.execute(queryCrear)    
+    conexion.commit()
+    cur.close()
+    conexion.close()
 
 def getNextId(conexion):
     cur =  conexion.cursor()
     cur.execute("SELECT MAX(per_id) FROM persona")
+    for row in cur:
+        retorno = str(int(row[0]) + 1)
+    
+    return retorno
     
 # INICIO DE PROGRAMA
 
@@ -92,11 +104,11 @@ while (opcion != 5):
     elif (opcion == 2):
         print("ESCRIBIRÁ NUEVO REGISTRO EN LA BASE")
         print("===================================\n\n")
-        nombre = str(input("Ingrese nombre: "))        
-        apellidoPaterno = str(input("Ingrese apellido Paterno: "))
-        apellidoMaterno = str(input("Ingrese apellido Materno: "))
-        rut = str(input("Ingrese rut: "))
-        observacion = str(input("Ingrese observacion: "))
+        nombre = str(input("Ingrese nombre: ")).upper()        
+        apellidoPaterno = str(input("Ingrese apellido Paterno: ")).upper()
+        apellidoMaterno = str(input("Ingrese apellido Materno: ")).upper()
+        rut = str(input("Ingrese rut: ")).upper()
+        observacion = str(input("Ingrese observacion: ")).upper()
 
         nuevaPersona = Persona.Persona(0, nombre, apellidoPaterno, apellidoMaterno, rut, observacion)
         crearRegistroBase(conexion, nuevaPersona)
