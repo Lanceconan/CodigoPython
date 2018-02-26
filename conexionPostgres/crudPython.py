@@ -1,12 +1,14 @@
 # Instalar 'psycopg2' desde http://www.stickpeople.com/projects/python/win-psycopg/ en Windows
 # https://www.fullstackpython.com/blog/postgresql-python-3-psycopg2-ubuntu-1604.html para Linux
+#
 #Crear la Base de Datos mediante script adjunto
 
 import os
 import psycopg2, psycopg2.extras
-#import persona
+import Persona
 
 #METODOS
+
 def getConectionPostgres(
     host, 
     database, 
@@ -21,8 +23,9 @@ def getConectionPostgres(
 def leerBase(conexion, registros):
     cur = conexion.cursor()
     cur.execute("SELECT * FROM persona LIMIT " + str(registros))
-    rows = cur.fetchall()
-    print (rows)
+    
+    for row in cur:
+        print("ID: %s \nNOMBRE: %s \nApellido Paterno: %s \nApellido Materno: %s \nRut: %s \nObservación", (str(row[0]), str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5])))
     
 
 def editarBase(conexion, idPersona):
@@ -37,14 +40,19 @@ def eliminarBase(conexion, idPersona):
     cur.execute(queryEditar)
     return 0
 
-def crearRegistroBase(conexion):
+def crearRegistroBase(conexion, persona):
     cur = conexion.cursor()
-    queryCrear = "INSERT INTO persona (per_id, per_nombre, per_apellidomaterno, per_apellidopaterno, per_rut character, per_observacion) VALUES "
+    queryCrear = "INSERT INTO persona (per_id, per_nombre, per_apellidomaterno, per_apellidopaterno, per_rut character, per_observacion) VALUES (" + "," + "," + "," + "," + ");"
     cur.execute(queryCrear)
     return 0
 
+def getNextId(conexion):
+    cur =  conexion.cursor()
+    cur.execute("SELECT MAX(per_id) FROM persona")
+    
 # INICIO DE PROGRAMA
 
+at = Persona.Persona(1,'as', 'as', 'as', 'as', 'as')
 opcion = 0
 
 conexion = getConectionPostgres(
@@ -53,6 +61,8 @@ conexion = getConectionPostgres(
             'postgres',
             'postgres',
             '1680')
+
+personas = []
 
 while (opcion != 5):
     
@@ -82,6 +92,14 @@ while (opcion != 5):
     elif (opcion == 2):
         print("ESCRIBIRÁ NUEVO REGISTRO EN LA BASE")
         print("===================================\n\n")
+        nombre = str(input("Ingrese nombre: "))        
+        apellidoPaterno = str(input("Ingrese apellido Paterno: "))
+        apellidoMaterno = str(input("Ingrese apellido Materno: "))
+        rut = str(input("Ingrese rut: "))
+        observacion = str(input("Ingrese observacion: "))
+
+        nuevaPersona = Persona.Persona(0, nombre, apellidoPaterno, apellidoMaterno, rut, observacion)
+        crearRegistroBase(conexion, nuevaPersona)
 
         input("\nTecla para continuar.... \n") 
 
