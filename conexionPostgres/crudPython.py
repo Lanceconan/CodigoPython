@@ -28,32 +28,47 @@ def leerBase(conexion, registros):
         print("\nID: " + str(row[0]) + "\nNOMBRE: " + str(row[1]) + "\nApellido Paterno: " + str(row[2]) +  "\nApellido Materno: " + str(row[3]) + "\nRut: " + str(row[4]) +  "\nObservación: " + str(row[5]))
     
     cur.close()
-    conexion.close()
     
 
-def editarBase(conexion, idPersona):
+def obtenerPersonaByRut(conexion, rut):
     cur = conexion.cursor()
-    queryEditar = "UPDATE persona SET per_nombre = , per_apellidomaterno = , per_apellidopaterno = , per_rut character = , per_observacion =  WHERE per_id = "  + idPersona 
-    cur.execute(queryEditar)
-    return 0
+    cur.execute("SELECT * FROM persona WHERE per_rut = '" + str(rut) + "';")
+    
+    for row in cur:
+        nuevaPersona = Persona.Persona(str(row[0]), str(row[1]), str(row[2]), str(row[3]), str(row[4]), str(row[5]))
 
-def eliminarBase(conexion, idPersona):
+    cur.close()
+
+    return nuevaPersona
+
+
+def editarBase(conexion, persona):
     cur = conexion.cursor()
-    queryEditar = "DELETE FROM persona WHERE per_id = " + idPersona
+    queryEditar = "UPDATE persona SET per_nombre = '" + str(persona.getNombre()) + "', per_apellidomaterno = '" + str(persona.getApellidoMaterno()) + "', per_apellidopaterno = '" + str(persona.getApellidoPaterno()) +"', per_rut = '" + str(persona.getRut()) +  "', per_observacion = '" + str(persona.getRut()) + "' WHERE per_id = "  + str(persona.getIdPersona()) + ";"
     cur.execute(queryEditar)
-    return 0
+    conexion.commit()    
+
+    cur.close()
+
+def eliminarBase(conexion, rutPersona):
+    cur = conexion.cursor()
+    queryEditar = "DELETE FROM persona WHERE per_rut = '" + rutPersona + "';"
+    cur.execute(queryEditar)
+    conexion.commit()
+
+    cur.close()
+    
 
 def crearRegistroBase(conexion, persona):
     persona.setIdPersona(getNextId(conexion))
     
     cur = conexion.cursor()
     queryCrear = "INSERT INTO persona (per_id, per_nombre, per_apellidomaterno, per_apellidopaterno, per_rut, per_observacion) VALUES (" + persona.getIdPersona() + "::bigint, '" + persona.getNombre() +  "'::character varying,'" + persona.getApellidoPaterno() + "'::character varying,'" + persona.getApellidoMaterno() + "'::character varying,'" + persona.getRut() + "'::character varying,'" + persona.getObservacion() + "'::character varying);"
-    print (queryCrear)
     cur.execute(queryCrear)    
     conexion.commit()
-    cur.close()
-    conexion.close()
 
+    cur.close()
+    
 def getNextId(conexion):
     cur =  conexion.cursor()
     cur.execute("SELECT MAX(per_id) FROM persona")
@@ -64,7 +79,6 @@ def getNextId(conexion):
     
 # INICIO DE PROGRAMA
 
-at = Persona.Persona(1,'as', 'as', 'as', 'as', 'as')
 opcion = 0
 
 conexion = getConectionPostgres(
@@ -119,16 +133,36 @@ while (opcion != 5):
         print("EDITARÁ UN REGISTRO EN LA BASE DE DATOS")
         print("======================================\n\n")
 
+        rut = str(input("INGRESE EL RUT A EDITAR: ")).upper()        
+        personaNueva = obtenerPersonaByRut(conexion, rut)
+
+        print("\nID: " + personaNueva.getIdPersona() + "\nNOMBRE: " + personaNueva.getNombre() + "\nApellido Paterno: " + personaNueva.getApellidoPaterno() +  "\nApellido Materno: " + personaNueva.getApellidoMaterno() + "\nRut: " + personaNueva.getRut() +  "\nObservación: " + personaNueva.getObservacion())
+    
+        nombre = str(input("\nIngrese nombre: ")).upper()        
+        apellidoPaterno = str(input("Ingrese apellido Paterno: ")).upper()
+        apellidoMaterno = str(input("Ingrese apellido Materno: ")).upper()
+        rut = str(input("Ingrese rut: ")).upper()
+        observacion = str(input("Ingrese observacion: ")).upper()
+
+        nuevaPersonaEditada = Persona.Persona(personaNueva.getIdPersona(), nombre, apellidoPaterno, apellidoMaterno, rut, observacion)
+                
+        editarBase(conexion, nuevaPersonaEditada)
+        
         input("\nTecla para continuar.... \n") 
 
     elif (opcion == 4):
         print("ELIMINARÁ UN REGISTRO")
         print("===================\n\n")
-
+        print("")
+        rut = str(input("INGRESE EL RUT A ELIMINAR: ")).upper()
+        
+        eliminarBase(conexion, rut)
+        
         input("\nTecla para continuar.... \n") 
         
     elif (opcion == 5):
-        print("USTED SALIÓ")
+        print("USTED SALIÓ")        
+        conexion.close()
         break
     
     else:
